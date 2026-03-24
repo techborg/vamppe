@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #0a0a0f;
+    background-image:
+      radial-gradient(ellipse 70% 40% at 20% -5%, rgba(249,115,22,0.09) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 30% at 80% 100%, rgba(139,92,246,0.07) 0%, transparent 50%);
+    color: #f3f4f6;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+  ::selection { background: rgba(249,115,22,0.28); color: white; }
+}
+
+@layer components {
+  /* ── Glass card ── */
+  .glass {
+    background: rgba(18, 18, 26, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .glass-sm {
+    background: rgba(22, 22, 32, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply font-semibold py-2.5 px-6 rounded-xl transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed
+           active:scale-[0.97] text-sm text-white relative overflow-hidden;
+    background: linear-gradient(135deg, #f97316 0%, #e8650a 100%);
+    box-shadow: 0 2px 12px rgba(249,115,22,0.2);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:not(:disabled):hover::before { opacity: 1; }
+  .btn-primary:not(:disabled):hover {
+    box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:not(:disabled):active { transform: translateY(0) scale(0.97); }
+
+  .btn-ghost {
+    @apply border text-gray-300 font-medium py-2.5 px-6 rounded-xl
+           transition-all duration-200 active:scale-[0.97] text-sm;
+    border-color: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    transform: translateY(-1px);
+  }
+
+  .btn-follow {
+    @apply font-semibold py-1.5 px-5 rounded-lg text-sm transition-all active:scale-[0.97];
+    background: white;
+    color: #0a0a0f;
+  }
+  .btn-follow:hover {
+    background: #f3f4f6;
+    box-shadow: 0 2px 10px rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+  .btn-following {
+    @apply font-medium py-1.5 px-5 rounded-lg text-sm transition-all text-gray-300;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.03);
+  }
+  .btn-following:hover {
+    border-color: rgba(239,68,68,0.5);
+    color: #f87171;
+    background: rgba(239,68,68,0.07);
+  }
+
+  /* ── Inputs ── */
+  .input-field {
+    @apply w-full rounded-xl px-4 py-3 text-gray-100 placeholder-gray-600 text-sm
+           focus:outline-none transition-all duration-200;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .input-field:focus {
+    border-color: rgba(249,115,22,0.45);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 0 0 3px rgba(249,115,22,0.08);
+  }
+
+  /* ── Nav items ── */
+  .nav-item {
+    @apply flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-gray-500
+           hover:text-white transition-all duration-150 cursor-pointer;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); }
+
+  .nav-item-active {
+    @apply flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-white
+           font-semibold cursor-pointer;
+    background: rgba(249,115,22,0.1);
+    color: #fb923c;
+  }
+
+  /* ── Post action buttons ── */
+  .post-action {
+    @apply flex items-center gap-1.5 text-gray-600 text-sm transition-all duration-150
+           rounded-lg px-2 py-1.5 select-none;
+  }
+  .post-action:hover {
+    color: #d1d5db;
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* ── Notification badge ── */
+  .badge {
+    @apply inline-flex items-center justify-center text-white
+           text-[10px] font-bold rounded-full min-w-[17px] h-[17px] px-1;
+    background: linear-gradient(135deg, #f97316, #ea6c0a);
+    box-shadow: 0 0 8px rgba(249,115,22,0.5);
+  }
+
+  /* ── Divider ── */
+  .divider { border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* ── Gradient text ── */
+  .text-gradient {
+    background: linear-gradient(135deg, #f97316, #c026d3, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Glow ring on avatar ── */
+  .avatar-ring {
+    box-shadow: 0 0 0 2px rgba(249,115,22,0.5), 0 0 12px rgba(249,115,22,0.2);
+  }
+}

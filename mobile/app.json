@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Vamppe",
+    "slug": "vamppe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0a0f"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vamppe.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a0f"
+      },
+      "package": "com.vamppe.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}
