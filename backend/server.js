@@ -19,6 +19,9 @@ const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || 'http://localhost:5173',
   'http://10.0.2.2:5173',
   'http://localhost:19006',
+  /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/172\.\d+\.\d+\.\d+(:\d+)?$/,
+  /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/,
 ];
 
 const io = new Server(server, {

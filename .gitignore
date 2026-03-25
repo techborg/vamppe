@@ -15,6 +15,27 @@ frontend/build/
 mobile/.expo/
 mobile/dist/
 
+# ── Flutter ───────────────────────────────────────────────────────────────────
+flutter_mobile/build/
+flutter_mobile/.dart_tool/
+flutter_mobile/.flutter-plugins
+flutter_mobile/.flutter-plugins-dependencies
+flutter_mobile/.packages
+flutter_mobile/pubspec.lock
+flutter_mobile/android/.gradle/
+flutter_mobile/android/local.properties
+flutter_mobile/android/key.properties
+flutter_mobile/android/app/google-services.json
+flutter_mobile/ios/Pods/
+flutter_mobile/ios/.symlinks/
+flutter_mobile/ios/Flutter/Flutter.framework
+flutter_mobile/ios/Flutter/Flutter.podspec
+flutter_mobile/ios/Runner.xcworkspace/
+flutter_mobile/ios/GoogleService-Info.plist
+flutter_mobile/coverage/
+flutter_mobile/**/*.g.dart
+flutter_mobile/**/*.freezed.dart
+
 # ── Uploads (user content) ────────────────────────────────────────────────────
 backend/uploads/*
 !backend/uploads/.gitkeep

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import socket from '../utils/socket';
 
@@ -10,14 +11,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    SecureStore.getItemAsync('user').then((u) => {
-      if (u) {
-        const parsed = JSON.parse(u);
-        setUser(parsed);
-        connectSocket(parsed._id);
+    const init = async () => {
+      try {
+        const u = await SecureStore.getItemAsync('user');
+        if (u) {
+          const parsed = JSON.parse(u);
+          setUser(parsed);
+          // Don't connect socket on init — wait until login
+        }
+      } catch (e) {
+        // ignore
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+    init();
   }, []);
 
   const connectSocket = (userId) => {
@@ -48,7 +56,11 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{ user, onlineUsers, loading, login, logout, updateUser }}>
-      {children}
+      {loading
+        ? <View style={{ flex: 1, backgroundColor: '#0a0a0f', alignItems: 'center', justifyContent: 'center' }}>
+            <ActivityIndicator color="#f97316" size="large" />
+          </View>
+        : children}
     </AuthContext.Provider>
   );
 }
