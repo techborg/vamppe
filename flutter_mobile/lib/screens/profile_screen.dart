@@ -9,6 +9,7 @@ import '../widgets/avatar.dart';
 import '../widgets/post_card.dart';
 import '../widgets/verified_badge.dart';
 import '../context/auth_provider.dart';
+import '../widgets/follow_list_modal.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,7 +27,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool editing = false;
   bool saving  = false;
   bool followLoading = false;
-  late String userId;
+  bool _initialized = false;
+  String userId = '';
   late TabController _tabs;
 
   final _bioCtrl      = TextEditingController();
@@ -47,7 +49,11 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.didChangeDependencies();
     final id = ModalRoute.of(context)?.settings.arguments as String?;
     final auth = context.read<AuthProvider>();
-    userId = id ?? auth.user?['_id'] ?? '';
+    final newUserId = id ?? auth.user?['_id'] ?? '';
+    if (_initialized && newUserId == userId) return;
+    _initialized = true;
+    userId = newUserId;
+    if (userId.isEmpty) return;
     _load();
   }
 
@@ -408,15 +414,11 @@ class _ProfileScreenState extends State<ProfileScreen>
 
           const SizedBox(height: 14),
           Row(children: [
-            _Stat(
-                label: 'Following',
-                value:
-                    (profile!['following'] as List?)?.length ?? 0),
+            _Stat(label: 'Following', value: (profile!['following'] as List?)?.length ?? 0,
+                onTap: () => showFollowList(context, userId, 'following')),
             const SizedBox(width: 24),
-            _Stat(
-                label: 'Followers',
-                value:
-                    (profile!['followers'] as List?)?.length ?? 0),
+            _Stat(label: 'Followers', value: (profile!['followers'] as List?)?.length ?? 0,
+                onTap: () => showFollowList(context, userId, 'followers')),
             const SizedBox(width: 24),
             _Stat(label: 'Posts', value: posts.length),
           ]),
@@ -657,16 +659,14 @@ class _VerifyRequestSheetState extends State<_VerifyRequestSheet> {
 class _Stat extends StatelessWidget {
   final String label;
   final int value;
-  const _Stat({required this.label, required this.value});
+  final VoidCallback? onTap;
+  const _Stat({required this.label, required this.value, this.onTap});
   @override
-  Widget build(BuildContext context) =>
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('$value',
-            style: const TextStyle(
-                color: white,
-                fontWeight: FontWeight.w800,
-                fontSize: 16)),
-        Text(label,
-            style: const TextStyle(color: gray3, fontSize: 12)),
-      ]);
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('$value', style: const TextStyle(color: white, fontWeight: FontWeight.w800, fontSize: 16)),
+      Text(label, style: TextStyle(color: onTap != null ? orange : gray3, fontSize: 12)),
+    ]),
+  );
 }

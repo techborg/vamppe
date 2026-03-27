@@ -26,4 +26,14 @@ router.put('/read', auth, async (req, res) => {
   }
 });
 
+// GET /api/notifications/unread-count
+router.get('/unread-count', auth, async (req, res) => {
+  try {
+    const count = await Notification.countDocuments({ userId: req.userId, read: false });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

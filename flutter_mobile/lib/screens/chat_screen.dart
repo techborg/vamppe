@@ -5,6 +5,9 @@ import '../utils/api.dart';
 import '../utils/theme.dart';
 import '../widgets/avatar.dart';
 import '../context/auth_provider.dart';
+import '../widgets/empty_state.dart';
+
+import '../widgets/vamppe_logo.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -33,7 +36,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(10),
+          child: VamppeLogo(size: 28),
+        ),
+        title: const Text('Messages')),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: orange))
           : RefreshIndicator(
@@ -42,8 +50,12 @@ class _ChatScreenState extends State<ChatScreen> {
               onRefresh: _load,
               child: conversations.isEmpty
                   ? ListView(children: const [
-                      SizedBox(height: 160),
-                      Center(child: Text('No conversations yet.\nMessage someone from their profile.', textAlign: TextAlign.center, style: TextStyle(color: gray3))),
+                      SizedBox(height: 120),
+                      EmptyState(
+                        icon: Icons.chat_bubble_outline,
+                        title: 'No messages yet',
+                        subtitle: 'Message someone from their profile to start a conversation.',
+                      ),
                     ])
                   : ListView.builder(
                       itemCount: conversations.length,

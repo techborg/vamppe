@@ -466,7 +466,7 @@ export default function Profile({ username: usernameProp }) {
                 )}
               </>
             ) : (              <>
-                <button onClick={() => navigate(`/chat/${profile._id}`)}
+                <button onClick={() => navigate(`/chat/${profile.username}`)}
                   className="btn-ghost flex items-center gap-1.5 text-xs py-2 px-4">
                   <ChatIcon className="w-3.5 h-3.5" /> Message
                 </button>

@@ -4,6 +4,12 @@ import '../utils/theme.dart';
 import '../widgets/post_card.dart';
 import 'create_post_sheet.dart';
 
+import '../widgets/skeleton.dart';
+import '../widgets/vamppe_logo.dart';
+import '../widgets/stories_bar.dart';
+import '../widgets/suggested_users.dart';
+import '../widgets/empty_state.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
@@ -47,8 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vamppe',
-            style: TextStyle(color: orange, fontWeight: FontWeight.w900, fontSize: 20)),
+        title: const VamppeLogo(size: 32, showText: true),
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu, color: white),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline, color: orange),
@@ -65,54 +76,42 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: loading
-          ? const Center(child: CircularProgressIndicator(color: orange))
+          ? ListView.builder(itemCount: 4, itemBuilder: (_, __) => const PostSkeleton())
           : RefreshIndicator(
               color: orange,
               backgroundColor: surface1,
               onRefresh: _refresh,
               child: error.isNotEmpty
                   ? ListView(children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            const Icon(Icons.wifi_off, color: gray3, size: 48),
-                            const SizedBox(height: 12),
-                            Text(error,
-                                style: const TextStyle(color: gray3, fontSize: 13),
-                                textAlign: TextAlign.center),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: orange,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12))),
-                              onPressed: () {
-                                setState(() => loading = true);
-                                _fetch(1);
-                              },
-                              child: const Text('Retry', style: TextStyle(color: white)),
-                            ),
-                          ]),
-                        ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                      EmptyState(
+                        icon: Icons.wifi_off_outlined,
+                        title: 'Connection error',
+                        subtitle: error,
+                        onAction: _refresh,
                       ),
                     ])
                   : posts.isEmpty
                       ? ListView(children: [
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.35),
-                          const Center(
-                            child: Text(
-                              'Your feed is empty.\nFollow people to see posts.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: gray3),
-                            ),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                          const EmptyState(
+                            icon: Icons.auto_awesome_mosaic_outlined,
+                            title: 'Your feed is quiet',
+                            subtitle: 'Follow people to see their posts here.',
                           ),
                         ])
                       : ListView.builder(
-                          itemCount: posts.length + (hasMore ? 1 : 0),
+                          itemCount: posts.length + 3 + (hasMore ? 1 : 0),
                           itemBuilder: (_, i) {
-                            if (i == posts.length) {
+                            // Slot 0: stories bar
+                            if (i == 0) return const StoriesBar();
+                            // Slot 1: suggested users (shown when feed has posts)
+                            if (i == 1) return const SuggestedUsers();
+                            // Slot 2: divider
+                            if (i == 2) return const SizedBox.shrink();
+
+                            final postIdx = i - 3;
+                            if (postIdx == posts.length) {
                               if (!loadingMore) {
                                 Future.microtask(() async {
                                   setState(() => loadingMore = true);
@@ -128,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               );
                             }
                             return PostCard(
-                              post: posts[i],
+                              post: posts[postIdx],
                               onDelete: (id) =>
                                   setState(() => posts.removeWhere((p) => p['_id'] == id)),
                               onUpdate: (u) => setState(() =>

@@ -10,6 +10,11 @@ const SettingsIcon = ({ className }) => (
     <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
   </svg>
 );
+const BookmarkNavIcon = ({ className }) => (
+  <svg viewBox="0 0 24 24" className={className || 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+  </svg>
+);
 import VamppeLogo from './VamppeLogo';
 import VerifiedBadge from './VerifiedBadge';
 import api from '../utils/api';
@@ -31,7 +36,8 @@ export default function Sidebar() {
     { to: '/notifications',         label: 'Activity', Icon: BellIcon, badge: unread },
     { to: '/chat',                  label: 'Messages', Icon: ChatIcon },
     { to: `/${user?.username}`,  label: 'Profile',  Icon: UserIcon },
-    { to: '/settings',              label: 'Settings', Icon: SettingsIcon },
+    { to: '/bookmarks',          label: 'Bookmarks', Icon: BookmarkNavIcon },
+    { to: '/settings',           label: 'Settings', Icon: SettingsIcon },
   ];
 
   const AdminIcon = ({ className }) => (

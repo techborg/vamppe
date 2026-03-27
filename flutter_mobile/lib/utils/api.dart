@@ -43,8 +43,16 @@ class Api {
     return _handle(res);
   }
 
-  static Future<dynamic> delete(String path) async {
-    final res = await http.delete(
+  static Future<dynamic> patch(String path, [Map<String, dynamic>? body]) async {
+    final res = await http.patch(
+      Uri.parse('$apiUrl$path'),
+      headers: await _headers(),
+      body: body != null ? jsonEncode(body) : null,
+    ).timeout(const Duration(seconds: 10));
+    return _handle(res);
+  }
+
+  static Future<dynamic> delete(String path) async {    final res = await http.delete(
       Uri.parse('$apiUrl$path'),
       headers: await _headers(),
     ).timeout(const Duration(seconds: 10));
@@ -86,7 +94,7 @@ class Api {
   static dynamic _handle(http.Response res) {
     final body = jsonDecode(utf8.decode(res.bodyBytes));
     if (res.statusCode >= 400) {
-      throw body['message'] ?? 'Request failed';
+      throw body['message'] ?? 'Request failed (${res.statusCode})';
     }
     return body;
   }

@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
     verifiedType: { type: String, enum: ['none', 'blue', 'gold', 'purple', 'red'], default: 'none' },
     isAdmin: { type: Boolean, default: false },
     banned: { type: Boolean, default: false },
+    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     emailVerified: { type: Boolean, default: false },
     emailVerifyToken: { type: String, default: null },
     emailVerifyExpires: { type: Date, default: null },

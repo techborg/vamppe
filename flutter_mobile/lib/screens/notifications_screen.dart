@@ -3,6 +3,9 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../utils/api.dart';
 import '../utils/theme.dart';
 import '../widgets/avatar.dart';
+import '../widgets/empty_state.dart';
+
+import '../widgets/vamppe_logo.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -37,7 +40,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Activity')),
+      appBar: AppBar(
+        leading: const Padding(
+          padding: EdgeInsets.all(10),
+          child: VamppeLogo(size: 28),
+        ),
+        title: const Text('Activity')),
       body: loading
           ? const Center(child: CircularProgressIndicator(color: orange))
           : RefreshIndicator(
@@ -46,8 +54,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               onRefresh: _load,
               child: notifications.isEmpty
                   ? ListView(children: const [
-                      SizedBox(height: 160),
-                      Center(child: Text('All quiet here', style: TextStyle(color: gray3))),
+                      SizedBox(height: 120),
+                      EmptyState(
+                        icon: Icons.notifications_none_outlined,
+                        title: 'All quiet here',
+                        subtitle: 'When people like your posts or follow you, you\'ll see it here.',
+                      ),
                     ])
                   : ListView.builder(
                       itemCount: notifications.length,

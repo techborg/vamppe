@@ -4,6 +4,8 @@ import '../utils/api.dart';
 import '../utils/theme.dart';
 import '../context/auth_provider.dart';
 
+import '../widgets/vamppe_logo.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
   @override
@@ -48,11 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.all(28),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             const SizedBox(height: 40),
-            Container(
-              width: 60, height: 60,
-              decoration: BoxDecoration(color: surface2, borderRadius: BorderRadius.circular(18), border: Border.all(color: borderColor)),
-              child: const Center(child: Text('V', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: orange))),
-            ),
+            const VamppeLogo(size: 64),
             const SizedBox(height: 20),
             const Text('Join Vamppe', style: TextStyle(color: white, fontWeight: FontWeight.w800, fontSize: 24)),
             const SizedBox(height: 6),

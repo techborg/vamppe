@@ -25,6 +25,7 @@ flutter_mobile/pubspec.lock
 flutter_mobile/android/.gradle/
 flutter_mobile/android/local.properties
 flutter_mobile/android/key.properties
+flutter_mobile/android/app/vamppe-release.jks
 flutter_mobile/android/app/google-services.json
 flutter_mobile/ios/Pods/
 flutter_mobile/ios/.symlinks/
@@ -66,3 +67,6 @@ yarn.lock
 .cache/
 .temp/
 *.tgz
+
+# Icon generator script (dev tool only)
+flutter_mobile/gen_icons.py

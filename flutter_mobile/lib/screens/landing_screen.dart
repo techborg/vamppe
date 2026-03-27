@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../utils/theme.dart';
 
+import '../widgets/vamppe_logo.dart';
+
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
@@ -11,18 +13,7 @@ class LandingScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            // Logo
-            Container(
-              width: 72, height: 72,
-              decoration: BoxDecoration(
-                color: surface2,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: borderColor),
-              ),
-              child: const Center(
-                child: Text('V', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: orange)),
-              ),
-            ),
+            const VamppeLogo(size: 72),
             const SizedBox(height: 24),
             RichText(text: const TextSpan(
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: white),

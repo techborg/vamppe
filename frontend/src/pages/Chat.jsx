@@ -9,7 +9,7 @@ import { SendIcon, BackIcon } from '../components/Icons';
 import SEOHead from '../components/SEOHead';
 
 export default function Chat() {
-  const { userId } = useParams();
+  const { username: usernameParam } = useParams();
   const { user, onlineUsers } = useAuth();
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
@@ -22,20 +22,26 @@ export default function Chat() {
   const inputRef = useRef();
   const typingTimeoutRef = useRef();
 
+  // Resolve username → userId
+  const userId = activeUser?._id || null;
+
   useEffect(() => {
     api.get('/messages/conversations').then((r) => setConversations(r.data));
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!usernameParam) { setActiveUser(null); setMessages([]); return; }
     setLoadingMsgs(true);
     setMessages([]);
-    Promise.all([api.get(`/users/profile/${userId}`), api.get(`/messages/history/${userId}`)]).then(([u, m]) => {
+    Promise.all([
+      api.get(`/users/by-username/${usernameParam}`),
+      api.get(`/messages/history-by-username/${usernameParam}`).catch(() => api.get(`/users/by-username/${usernameParam}`).then(r => api.get(`/messages/history/${r.data._id}`))),
+    ]).then(([u, m]) => {
       setActiveUser(u.data);
-      setMessages(m.data);
+      setMessages(Array.isArray(m.data) ? m.data : []);
     }).finally(() => setLoadingMsgs(false));
     setTimeout(() => inputRef.current?.focus(), 100);
-  }, [userId]);
+  }, [usernameParam]);
 
   useEffect(() => {
     socket.on('receive_message', (msg) => {
@@ -50,14 +56,24 @@ export default function Chat() {
     socket.on('typing_stop', ({ senderId }) => {
       if (senderId === userId) setIsTyping(false);
     });
+    socket.on('messages_read', ({ by }) => {
+      if (by === userId) {
+        setMessages((prev) => prev.map((m) => m.isMine ? { ...m, read: true } : m));
+      }
+    });
+    socket.on('message_reaction', ({ messageId, reaction }) => {
+      setMessages((prev) => prev.map((m) =>
+        (m._id === messageId) ? { ...m, reaction } : m
+      ));
+    });
     return () => {
       socket.off('receive_message');
       socket.off('typing_start');
       socket.off('typing_stop');
+      socket.off('messages_read');
+      socket.off('message_reaction');
     };
-  }, [userId]);
-
-  useEffect(() => {
+  }, [userId]);  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
@@ -109,16 +125,16 @@ export default function Chat() {
             <div className="p-6 text-center text-gray-700 text-sm">No conversations yet</div>
           )}
           {conversations.map((c) => {
-            const active = userId === c.user?._id;
+            const active = usernameParam === c.user?.username;
             return (
               <div
                 key={c.user?._id}
-                onClick={() => navigate(`/chat/${c.user?._id}`)}
+                onClick={() => navigate(`/chat/${c.user?.username}`)}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-all border-b"
                 style={{
                   borderColor: 'rgba(255,255,255,0.04)',
-                  background: active ? 'rgba(249,115,22,0.07)' : '',
-                  borderLeft: active ? '2px solid #f97316' : '2px solid transparent',
+                  background: usernameParam === c.user?.username ? 'rgba(249,115,22,0.07)' : '',
+                  borderLeft: usernameParam === c.user?.username ? '2px solid #f97316' : '2px solid transparent',
                 }}
                 onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
                 onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = ''; }}
@@ -168,8 +184,7 @@ export default function Chat() {
               </button>
               <div className="relative cursor-pointer" onClick={() => navigate(activeUser?.username ? `/${activeUser.username}` : `/profile/${userId}`)}>
                 <Avatar src={activeUser?.profilePicture} size={9} />
-                {isOnline(userId) && (
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2"
+                {isOnline(userId) && (                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2"
                     style={{ borderColor: '#0a0a0f' }} />
                 )}
               </div>
@@ -227,7 +242,13 @@ export default function Chat() {
                       {!m.nextSame && (
                         <p className={`text-[11px] text-gray-700 mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${m.isMine ? 'text-right' : 'text-left'}`}>
                           {format(m.createdAt)}
+                          {m.isMine && <span className="ml-1">{m.read ? ' ✓✓' : ' ✓'}</span>}
                         </p>
+                      )}
+                      {m.reaction && (
+                        <div className={`text-base mt-0.5 ${m.isMine ? 'text-right' : 'text-left'}`}>
+                          {m.reaction}
+                        </div>
                       )}
                     </div>
                   </div>

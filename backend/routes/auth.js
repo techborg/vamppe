@@ -15,8 +15,12 @@ router.post('/register', authLimiter, async (req, res) => {
 
     if (username.length < 3 || username.length > 30)
       return res.status(400).json({ message: 'Username must be 3–30 characters' });
-    if (password.length < 6)
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    if (password.length < 8)
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passRegex.test(password))
+      return res.status(400).json({ message: 'Password must include uppercase, lowercase, and a number' });
+    
     if (!/^[a-zA-Z0-9_]+$/.test(username))
       return res.status(400).json({ message: 'Username can only contain letters, numbers, and underscores' });
 

@@ -4,6 +4,37 @@ import api from '../utils/api';
 import Avatar from './Avatar';
 import VerifiedBadge from './VerifiedBadge';
 
+function TrendingHashtags() {
+  const [tags, setTags] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    api.get('/posts/trending-hashtags').then((r) => setTags(r.data)).catch(() => {});
+  }, []);
+
+  if (!tags.length) return null;
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden">
+      <div className="px-4 pt-4 pb-2.5 border-b border-white/[0.05]">
+        <h3 className="font-semibold text-sm text-gray-200">Trending</h3>
+      </div>
+      {tags.map((t, i) => (
+        <div key={t.tag}
+          className="px-4 py-2.5 cursor-pointer transition-colors"
+          style={{ borderBottom: i < tags.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = ''}
+          onClick={() => navigate(`/hashtag/${t.tag}`)}>
+          <p className="text-xs text-gray-600">Trending</p>
+          <p className="text-sm font-semibold text-gray-200">#{t.tag}</p>
+          <p className="text-xs text-gray-600">{t.count} posts</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function RightPanel() {
   const [suggestions, setSuggestions] = useState([]);
   const [query, setQuery] = useState('');
@@ -42,8 +73,8 @@ export default function RightPanel() {
         <input
           className="w-full rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-all"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
-          onFocus={(e) => { e.target.style.borderColor = 'rgba(249,115,22,0.4)'; e.target.style.background = 'rgba(255,255,255,0.06)'; e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.07)'; }}
-          onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.07)'; e.target.style.background = 'rgba(255,255,255,0.04)'; e.target.style.boxShadow = ''; }}
+          onFocus={(e) => { e.target.style.borderColor = 'rgba(249,115,22,0.4)'; e.target.style.background = 'rgba(255,255,255,0.06)'; }}
+          onBlur={(e) => { e.target.style.borderColor = 'rgba(255,255,255,0.07)'; e.target.style.background = 'rgba(255,255,255,0.04)'; }}
           placeholder="Search people…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -53,67 +84,43 @@ export default function RightPanel() {
       {/* People card */}
       <div className="glass rounded-2xl overflow-hidden">
         <div className="px-4 pt-4 pb-2.5 flex items-center justify-between border-b border-white/[0.05]">
-          <h3 className="font-semibold text-sm text-gray-200">
-            {query ? 'Results' : 'Who to follow'}
-          </h3>
+          <h3 className="font-semibold text-sm text-gray-200">{query ? 'Results' : 'Who to follow'}</h3>
           {!query && suggestions.length > 0 && (
-            <span className="text-[11px] text-gray-600 px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <span className="text-[11px] text-gray-600 px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
               {suggestions.length} suggested
             </span>
           )}
         </div>
 
         {displayed.length === 0 && (
-          <p className="text-gray-600 text-sm px-4 py-4">
-            {query ? 'No one found' : 'Check back later'}
-          </p>
+          <p className="text-gray-600 text-sm px-4 py-4">{query ? 'No one found' : 'Check back later'}</p>
         )}
 
         {displayed.slice(0, 5).map((u) => (
-          <div
-            key={u._id}
+          <div key={u._id}
             className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors"
             style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
             onMouseLeave={(e) => e.currentTarget.style.background = ''}
-            onClick={() => navigate(`/${u.username}`)}
-          >
+            onClick={() => navigate(`/${u.username}`)}>
             <Avatar src={u.profilePicture} size={9} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <p className="font-semibold text-sm truncate text-white">{u.username}</p>
                 {u.verified && <VerifiedBadge type={u.verifiedType || 'blue'} size={12} />}
               </div>
-              <p className="text-gray-600 text-xs truncate">
-                {u.followers?.length || 0} followers
-              </p>
+              <p className="text-gray-600 text-xs truncate">{u.followers?.length || 0} followers</p>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); handleFollow(u._id); }}
-              className={`text-xs flex-shrink-0 ${followed.has(u._id) ? 'btn-following' : 'btn-follow'}`}
-            >
+            <button onClick={(e) => { e.stopPropagation(); handleFollow(u._id); }}
+              className={`text-xs flex-shrink-0 ${followed.has(u._id) ? 'btn-following' : 'btn-follow'}`}>
               {followed.has(u._id) ? 'Following' : 'Follow'}
             </button>
           </div>
         ))}
       </div>
 
-      {/* Trending topics placeholder */}
-      <div className="glass rounded-2xl overflow-hidden">
-        <div className="px-4 pt-4 pb-2.5 border-b border-white/[0.05]">
-          <h3 className="font-semibold text-sm text-gray-200">Trending</h3>
-        </div>
-        {['design', 'javascript', 'webdev', 'react', 'opensource'].map((tag, i) => (
-          <div key={tag} className="px-4 py-2.5 cursor-pointer transition-colors"
-            style={{ borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = ''}>
-            <p className="text-xs text-gray-600">Trending</p>
-            <p className="text-sm font-semibold text-gray-200">#{tag}</p>
-          </div>
-        ))}
-      </div>
+      {/* Live trending hashtags */}
+      <TrendingHashtags />
 
       <p className="text-gray-700 text-xs mt-auto">Vamppe · Made with ❤️</p>
     </aside>

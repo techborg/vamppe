@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const helmet = require('helmet');
 const { apiLimiter, mongoSanitize, xssSanitizer, hpp } = require('./middleware/security');
 const PageView = require('./models/PageView');
+const Message = require('./models/Message');
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ const ALLOWED_ORIGINS = [
 ];
 
 const io = new Server(server, {
-  cors: { origin: ALLOWED_ORIGINS, methods: ['GET', 'POST'], credentials: true },
+  cors: { origin: true, methods: ['GET', 'POST'], credentials: true },
 });
 
 // ── Security headers ──────────────────────────────────────────────────────────
@@ -104,6 +105,8 @@ app.use('/api/posts',         require('./routes/posts'));
 app.use('/api/messages',      require('./routes/messages'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/admin',         require('./routes/admin'));
+app.use('/api/stories',       require('./routes/stories'));
+app.use('/api/bookmarks',     require('./routes/bookmarks'));
 
 // ─── Socket.io ────────────────────────────────────────────────────────────────
 // userId → socketId map for targeted delivery
@@ -128,6 +131,25 @@ io.on('connection', (socket) => {
   socket.on('typing_stop', ({ senderId, receiverId }) => {
     const sid = getSocketId(receiverId);
     if (sid) io.to(sid).emit('typing_stop', { senderId });
+  });
+
+  socket.on('message_reaction', ({ messageId, reaction, receiverId }) => {
+    const sid = getSocketId(receiverId);
+    if (sid) io.to(sid).emit('message_reaction', { messageId, reaction });
+  });
+
+  socket.on('mark_as_read', async ({ senderId, receiverId }) => {
+    if (!senderId || !receiverId) return;
+    try {
+      await Message.updateMany(
+        { senderId, receiverId, read: false },
+        { read: true, readAt: new Date() }
+      );
+      const sid = getSocketId(senderId);
+      if (sid) io.to(sid).emit('messages_read', { by: receiverId });
+    } catch (err) {
+      console.error('mark_as_read error:', err);
+    }
   });
 
   socket.on('disconnect', () => {

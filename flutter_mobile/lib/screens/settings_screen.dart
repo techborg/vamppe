@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../utils/api.dart';
 import '../utils/theme.dart';
 import '../context/auth_provider.dart';
+import '../widgets/vamppe_logo.dart';
+
+import '../utils/server_config.dart';
+import '../utils/constants.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -77,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         body['oldPassword'] = _oldPassCtrl.text;
         body['newPassword'] = _newPassCtrl.text;
       }
-      final res = await Api.put('/users/settings', body);
+      final res = await Api.patch('/users/settings', body);
       if (!mounted) return;
       context.read<AuthProvider>().updateUser(Map<String, dynamic>.from(res));
       _oldPassCtrl.clear();
@@ -92,9 +96,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _savePrivacy() async {
     setState(() => _saving = true);
     try {
-      await Api.put('/users/settings', {
-        'isPrivate': _privateAccount,
-        'showOnlineStatus': _showOnlineStatus,
+      await Api.patch('/users/settings', {
+        'settings': {
+          'privateAccount': _privateAccount,
+          'showOnlineStatus': _showOnlineStatus,
+        },
       });
       _showMsg('Privacy settings saved');
     } catch (e) {
@@ -106,11 +112,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _saveNotifications() async {
     setState(() => _saving = true);
     try {
-      await Api.put('/users/settings', {
-        'notifLikes': _notifLikes,
-        'notifComments': _notifComments,
-        'notifFollows': _notifFollows,
-        'notifMessages': _notifMessages,
+      await Api.patch('/users/settings', {
+        'settings': {
+          'notifyLikes': _notifLikes,
+          'notifyComments': _notifComments,
+          'notifyFollows': _notifFollows,
+          'notifyMessages': _notifMessages,
+        },
       });
       _showMsg('Notification preferences saved');
     } catch (e) {
@@ -137,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     if (confirm != true) return;
     try {
-      await Api.delete('/users/me');
+      await Api.delete('/users/account');
       if (!mounted) return;
       context.read<AuthProvider>().logout();
     } catch (e) {
@@ -148,7 +156,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: const Text('Settings'),
+        leading: const Padding(
+          padding: EdgeInsets.all(10),
+          child: VamppeLogo(size: 28),
+        ),
+      ),
       body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // Section list
         Container(
@@ -159,6 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _SectionTile(label: 'Account',       icon: Icons.manage_accounts_outlined, id: 'account',       current: _section, onTap: (s) => setState(() => _section = s)),
               _SectionTile(label: 'Privacy',        icon: Icons.lock_outline,             id: 'privacy',        current: _section, onTap: (s) => setState(() => _section = s)),
               _SectionTile(label: 'Notifications',  icon: Icons.notifications_outlined,   id: 'notifications',  current: _section, onTap: (s) => setState(() => _section = s)),
+              _SectionTile(label: 'Server',         icon: Icons.dns_outlined,             id: 'server',         current: _section, onTap: (s) => setState(() => _section = s)),
               _SectionTile(label: 'Danger Zone',    icon: Icons.warning_amber_outlined,   id: 'danger',         current: _section, onTap: (s) => setState(() => _section = s)),
             ],
           ),
@@ -182,7 +196,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (_section == 'account')   _buildAccount(),
               if (_section == 'privacy')   _buildPrivacy(),
               if (_section == 'notifications') _buildNotifications(),
-              if (_section == 'danger')    _buildDanger(),
+              if (_section == 'server')        _buildServer(),
+              if (_section == 'danger')        _buildDanger(),
             ],
           ),
         ),
@@ -231,6 +246,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
     const SizedBox(height: 20),
     _SaveBtn(label: 'Save preferences', loading: _saving, onTap: _saveNotifications),
   ]);
+
+  Widget _buildServer() {
+    final _urlCtrl = TextEditingController(text: baseUrl);
+    return StatefulBuilder(builder: (context, setLocal) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const _SectionHeader('Server URL'),
+      const Text('Set the backend server address. Use your PC\'s local WiFi IP.', style: TextStyle(color: gray3, fontSize: 13)),
+      const SizedBox(height: 14),
+      _Field(label: 'Base URL', ctrl: _urlCtrl),
+      const SizedBox(height: 6),
+      Text('Current: $baseUrl', style: const TextStyle(color: gray4, fontSize: 11)),
+      const SizedBox(height: 16),
+      Row(children: [
+        Expanded(
+          child: _SaveBtn(
+            label: 'Save & Restart',
+            loading: _saving,
+            onTap: () async {
+              if (_urlCtrl.text.trim().isEmpty) return;
+              setLocal(() {});
+              await ServerConfig.save(_urlCtrl.text.trim());
+              _showMsg('Server URL saved. Restart the app to apply.', err: false);
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+        TextButton(
+          onPressed: () async {
+            await ServerConfig.reset();
+            _urlCtrl.text = baseUrl;
+            setLocal(() {});
+            _showMsg('Reset to default');
+          },
+          child: const Text('Reset', style: TextStyle(color: gray3)),
+        ),
+      ]),
+      const SizedBox(height: 20),
+      Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(color: surface2, borderRadius: BorderRadius.circular(14), border: Border.all(color: borderColor)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('How to find your IP', style: TextStyle(color: gray2, fontWeight: FontWeight.w700, fontSize: 13)),
+          const SizedBox(height: 8),
+          const Text('1. Connect phone & PC to same WiFi\n2. On PC run: ipconfig\n3. Copy the WiFi IPv4 address\n4. Enter it here as: http://192.168.x.x:5000',
+              style: TextStyle(color: gray3, fontSize: 12, height: 1.6)),
+        ]),
+      ),
+    ]));
+  }
 
   Widget _buildDanger() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     const _SectionHeader('Danger Zone'),

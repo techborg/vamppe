@@ -269,4 +269,33 @@ router.delete('/account', auth, async (req, res) => {
   }
 });
 
+// POST /api/users/block/:id — block or unblock a user
+router.post('/block/:id', auth, async (req, res) => {
+  try {
+    if (req.params.id === req.userId) return res.status(400).json({ message: "Can't block yourself" });
+    const me = await User.findById(req.userId);
+    const isBlocked = me.blockedUsers?.includes(req.params.id);
+    if (isBlocked) {
+      await User.findByIdAndUpdate(req.userId, { $pull: { blockedUsers: req.params.id } });
+      return res.json({ blocked: false });
+    }
+    await User.findByIdAndUpdate(req.userId, { $addToSet: { blockedUsers: req.params.id } });
+    await User.findByIdAndUpdate(req.userId, { $pull: { following: req.params.id } });
+    await User.findByIdAndUpdate(req.params.id, { $pull: { followers: req.userId } });
+    res.json({ blocked: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/users/blocked — get blocked users list
+router.get('/blocked', auth, async (req, res) => {
+  try {
+    const me = await User.findById(req.userId).populate('blockedUsers', 'username profilePicture');
+    res.json(me.blockedUsers || []);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

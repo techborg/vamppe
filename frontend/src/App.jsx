@@ -10,6 +10,8 @@ import ProfileRedirect from './pages/ProfileRedirect';
 import Chat from './pages/Chat';
 import Notifications from './pages/Notifications';
 import Explore from './pages/Explore';
+import Bookmarks from './pages/Bookmarks';
+import Hashtag from './pages/Hashtag';
 import Layout from './components/Layout';
 import NotFound from './pages/NotFound';
 import AdminLayout from './admin/AdminLayout';
@@ -56,12 +58,14 @@ export default function App() {
           <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route path="/home" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/:usernameSlug" element={<UsernameRoute />} />
             <Route path="/profile/:id" element={<ProfileRedirect />} />
+            <Route path="/bookmarks" element={<Bookmarks />} />
+            <Route path="/hashtag/:tag" element={<Hashtag />} />
             <Route path="/chat" element={<Chat />} />
-            <Route path="/chat/:userId" element={<Chat />} />
+            <Route path="/chat/:username" element={<Chat />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/:usernameSlug" element={<UsernameRoute />} />
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
